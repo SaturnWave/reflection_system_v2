@@ -1,0 +1,552 @@
+```json
+{
+    "PK": "Temporary#376e1b61-5de2-40ab-a9da-82c7c031f2a3",
+    "SK": "376e1b61-5de2-40ab-a9da-82c7c031f2a3##d97fcf54-72c5-4f15-8c27-75e21160f18c",
+    "Type": "activity",
+    "CreatedAt": 1739675367202,
+    "UpdatedAt": 1739675367203,
+    "Metadata": {
+      "TopicUid": "376e1b61-5de2-40ab-a9da-82c7c031f2a3",
+      "ClassUid": "default",
+      "Duration": "most-of-the-class",
+      "Purpose": "relate-to-real-world",
+      "Class": "default"
+    },
+    "Content": {
+      "Overview": {
+        "title": "",
+        "duration": "most-of-the-class",
+        "purpose": "relate-to-real-world",
+        "segmentCount": 5,
+        "description": "",
+        "class": "default",
+        "classUid": "default"
+      },
+      "Strategies": [],
+      "Segments": [
+        {
+          "id": "1",
+          "title": "Engage",
+          "phase": "engage",
+          "focus": "discussion",
+          "grouping": "whole",
+          "materials": [],
+          "teacherActions": [
+            {
+              "action": "Start with a thought-provoking question",
+              "purpose": "Generate curiosity and encourage participation",
+              "lookFor": [
+                "Student engagement",
+                "Participation levels",
+                "Initial reactions"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "Whiteboard",
+                  "Markers",
+                  "Sticky notes"
+                ],
+                "setup": "Arrange seats for whole-class discussion, prepare whiteboard for note-taking"
+              },
+              "support": [
+                "Provide sentence stems for struggling students",
+                "Encourage peer-to-peer discussions"
+              ]
+            },
+            {
+              "action": "Use a real-life scenario to connect to student experiences",
+              "purpose": "Access prior knowledge and make learning relevant",
+              "lookFor": [
+                "Student connections to the scenario",
+                "Prior knowledge activation",
+                "Interest levels"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "Scenario handouts",
+                  "Whiteboard",
+                  "Markers"
+                ],
+                "setup": "Distribute scenario handouts, prepare whiteboard for note-taking"
+              },
+              "support": [
+                "Provide visual aids for visual learners",
+                "Offer one-on-one support for struggling students"
+              ]
+            }
+          ],
+          "assessmentPoints": [
+            {
+              "method": "Class discussion",
+              "criteria": [
+                "Student participation",
+                "Depth of discussion",
+                "Connections to prior knowledge"
+              ],
+              "followUp": [
+                "Adjust instruction based on student responses",
+                "Provide additional support for struggling students",
+                "Build on student interests and ideas"
+              ]
+            },
+            {
+              "method": "Student reflections",
+              "criteria": [
+                "Student understanding",
+                "Interest levels",
+                "Connections to real-life scenarios"
+              ],
+              "followUp": [
+                "Use reflections to inform future instruction",
+                "Provide feedback to students",
+                "Adjust the pace of instruction"
+              ]
+            }
+          ],
+          "environmentSetup": {
+            "roomArrangement": "Whole-class discussion setup",
+            "materials": [
+              "Whiteboard",
+              "Markers",
+              "Sticky notes",
+              "Scenario handouts"
+            ],
+            "preparations": [
+              "Arrange seats for whole-class discussion",
+              "Prepare whiteboard for note-taking",
+              "Distribute scenario handouts"
+            ]
+          }
+        },
+        {
+          "id": "2",
+          "title": "Explore",
+          "phase": "explore",
+          "focus": "hands-on",
+          "grouping": "small-group",
+          "materials": [],
+          "teacherActions": [
+            {
+              "action": "Provide open-ended questions",
+              "purpose": "Encourage systematic exploration and active discovery",
+              "lookFor": [
+                "Students asking questions",
+                "Students designing experiments",
+                "Students collecting data"
+              ],
+              "management": {
+                "grouping": "small-group",
+                "materials": [
+                  "Various materials for experimentation",
+                  "Data collection sheets",
+                  "Pencils and pens"
+                ],
+                "setup": "Prepare materials, arrange room for small-group work"
+              },
+              "support": [
+                "Differentiation for students with disabilities",
+                "Language scaffolds for English language learners"
+              ]
+            },
+            {
+              "action": "Circulate and facilitate",
+              "purpose": "Support collaboration and guide observations",
+              "lookFor": [
+                "Students working together",
+                "Students making observations",
+                "Students recording data"
+              ],
+              "management": {
+                "grouping": "small-group",
+                "materials": [
+                  "Whiteboards and markers",
+                  "Computers or tablets with internet access"
+                ],
+                "setup": "Ensure access to technology and writing materials"
+              },
+              "support": [
+                "Providing additional support for struggling students",
+                "Encouraging students to ask questions"
+              ]
+            }
+          ],
+          "assessmentPoints": [
+            {
+              "method": "Observation and feedback",
+              "criteria": [
+                "Students' ability to design and conduct an experiment",
+                "Students' ability to collect and analyze data",
+                "Students' ability to draw conclusions based on evidence"
+              ],
+              "followUp": [
+                "Provide feedback on experimental design",
+                "Discuss results and implications as a class",
+                "Have students reflect on their learning"
+              ]
+            },
+            {
+              "method": "Student self-assessment",
+              "criteria": [
+                "Students' ability to evaluate their own learning",
+                "Students' ability to set goals for future learning"
+              ],
+              "followUp": [
+                "Have students set goals for future investigations",
+                "Provide opportunities for students to reflect on their learning",
+                "Encourage students to share their findings with the class"
+              ]
+            }
+          ],
+          "environmentSetup": {
+            "roomArrangement": "Small-group tables with materials and equipment",
+            "materials": [
+              "Various materials for experimentation",
+              "Data collection sheets",
+              "Pencils and pens",
+              "Whiteboards and markers",
+              "Computers or tablets with internet access"
+            ],
+            "preparations": [
+              "Prepare materials and equipment",
+              "Arrange room for small-group work",
+              "Ensure access to technology and writing materials"
+            ]
+          }
+        },
+        {
+          "id": "3",
+          "title": "Explain",
+          "phase": "explain",
+          "focus": "demonstration",
+          "grouping": "whole",
+          "materials": [],
+          "teacherActions": [
+            {
+              "action": "Provide a clear and concise demonstration",
+              "purpose": "To introduce formal concepts and connect to student discoveries",
+              "lookFor": [
+                "Student engagement and participation",
+                "Ability to formalize observations",
+                "Use of precise vocabulary"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "Whiteboard and markers",
+                  "Visual aids",
+                  "Example problems"
+                ],
+                "setup": "Arrange the room to facilitate whole-class instruction, with clear visibility of the demonstration area"
+              },
+              "support": [
+                "Provide scaffolding for students who need extra support",
+                "Offer extensions for students who need a challenge",
+                "Encourage peer-to-peer discussions"
+              ]
+            },
+            {
+              "action": "Use visual representations to build conceptual frameworks",
+              "purpose": "To help students master key vocabulary and make connections",
+              "lookFor": [
+                "Student ability to identify and explain key concepts",
+                "Use of visual representations to support understanding",
+                "Ability to make connections between concepts"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "Diagrams",
+                  "Flowcharts",
+                  "Graphs"
+                ],
+                "setup": "Prepare visual aids in advance, and have them ready to display during the demonstration"
+              },
+              "support": [
+                "Provide additional visual aids for students who need extra support",
+                "Offer one-on-one support for students who are struggling",
+                "Encourage students to create their own visual representations"
+              ]
+            },
+            {
+              "action": "Check comprehension through formative assessments",
+              "purpose": "To ensure students have built a clear understanding of the concepts",
+              "lookFor": [
+                "Student ability to demonstrate understanding",
+                "Ability to apply concepts to new situations",
+                "Use of precise vocabulary"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "Quiz questions",
+                  "Class discussions",
+                  "Think-pair-share activities"
+                ],
+                "setup": "Prepare formative assessments in advance, and have them ready to administer during the lesson"
+              },
+              "support": [
+                "Provide feedback to students on their understanding",
+                "Offer additional support for students who are struggling",
+                "Encourage students to reflect on their own learning"
+              ]
+            }
+          ],
+          "assessmentPoints": [
+            {
+              "method": "Formative assessments",
+              "criteria": [
+                "Student ability to demonstrate understanding",
+                "Ability to apply concepts to new situations",
+                "Use of precise vocabulary"
+              ],
+              "followUp": [
+                "Provide feedback to students on their understanding",
+                "Offer additional support for students who are struggling",
+                "Adjust instruction to meet the needs of the students"
+              ]
+            },
+            {
+              "method": "Summative assessments",
+              "criteria": [
+                "Student mastery of key vocabulary",
+                "Ability to build conceptual frameworks",
+                "Ability to make connections between concepts"
+              ],
+              "followUp": [
+                "Provide feedback to students on their performance",
+                "Offer additional support for students who are struggling",
+                "Use assessment data to inform future instruction"
+              ]
+            }
+          ],
+          "environmentSetup": {
+            "roomArrangement": "Whole-class instruction with clear visibility of the demonstration area",
+            "materials": [
+              "Whiteboard and markers",
+              "Visual aids",
+              "Example problems",
+              "Diagrams",
+              "Flowcharts",
+              "Graphs",
+              "Quiz questions"
+            ],
+            "preparations": [
+              "Arrange the room to facilitate whole-class instruction",
+              "Prepare visual aids and example problems in advance",
+              "Prepare formative and summative assessments in advance"
+            ]
+          }
+        },
+        {
+          "id": "4",
+          "title": "Elaborate",
+          "phase": "elaborate",
+          "focus": "application",
+          "grouping": "pairs",
+          "materials": [],
+          "teacherActions": [
+            {
+              "action": "Provide real-world scenario cards",
+              "purpose": "Apply concepts to new situations",
+              "lookFor": [
+                "Students making connections between previous learning and new scenarios",
+                "Students using core concepts to solve problems"
+              ],
+              "management": {
+                "grouping": "pairs",
+                "materials": [
+                  "Scenario cards",
+                  "Whiteboards or paper",
+                  "Markets or pencils"
+                ],
+                "setup": "Distribute scenario cards and writing materials"
+              },
+              "support": [
+                "Offer one-on-one support for struggling students",
+                "Provide visual aids for students with learning difficulties"
+              ]
+            },
+            {
+              "action": "Facilitate peer discussion",
+              "purpose": "Support independent practice and monitor understanding",
+              "lookFor": [
+                "Students explaining their thought process to their partner",
+                "Students justifying their answers with core concepts"
+              ],
+              "management": {
+                "grouping": "pairs",
+                "materials": [
+                  "Timer",
+                  " bell",
+                  "None"
+                ],
+                "setup": "Set a timer for peer discussion, and ensure pairs have enough space to discuss"
+              },
+              "support": [
+                "Provide sentence stems for discussion",
+                "Encourage use of visuals or notes from previous activities"
+              ]
+            },
+            {
+              "action": "Collect and review student work",
+              "purpose": "Assess students’ application of concepts and identify misconceptions",
+              "lookFor": [
+                "Correct application of concepts in new scenarios",
+                "Identification of common misconceptions or areas of difficulty"
+              ],
+              "management": {
+                "grouping": "individual",
+                "materials": [
+                  "Student work samples",
+                  "Assessment rubric"
+                ],
+                "setup": "Prepare assessment rubric and collection method for student work"
+              },
+              "support": [
+                "Provide feedback to pairs",
+                "Plan for individual support or re-teaching based on common errors"
+              ]
+            }
+          ],
+          "assessmentPoints": [
+            {
+              "method": "Peer and teacher observation",
+              "criteria": [
+                "Students' ability to apply concepts in new situations",
+                "Students’ ability to engage in peer discussion",
+                "Clarity of explanations and justifications"
+              ],
+              "followUp": [
+                "Provide immediate feedback during peer discussion",
+                "Address common misconceptions in the next activity",
+                "Use observations to adjust pacing and support"
+              ]
+            },
+            {
+              "method": "Review of student work samples",
+              "criteria": [
+                "Accuracy of application",
+                "Depth of understanding",
+                "Quality of justifications"
+              ],
+              "followUp": [
+                "Provide written feedback on work samples",
+                "Plan for individual support or re-teaching for struggling students",
+                "Use work samples to inform future lesson adjustments"
+              ]
+            }
+          ],
+          "environmentSetup": {
+            "roomArrangement": "Pairs of desks or tables, ensuring space for discussion",
+            "materials": [
+              "Real-world scenario cards",
+              "Whiteboards or paper",
+              "Markers or pencils",
+              "Timer or bell"
+            ],
+            "preparations": [
+              "Prepare scenario cards, ensuring variety and relevance",
+              "Arrange desks for pair work",
+              "Set up timer for peer discussion"
+            ]
+          }
+        },
+        {
+          "id": "5",
+          "title": "Evaluate",
+          "phase": "evaluate",
+          "focus": "reflection",
+          "grouping": "individual",
+          "materials": [],
+          "teacherActions": [
+            {
+              "action": "Assign individual reflection tasks",
+              "purpose": "Encourage self-assessment and reinforce learning",
+              "lookFor": [
+                "Thoughtful responses",
+                "Evidence of self-assessment",
+                "Clear articulation of learning and challenges"
+              ],
+              "management": {
+                "grouping": "individual",
+                "materials": [
+                  "Reflection worksheets or journals",
+                  "Pencils or pens"
+                ],
+                "setup": "Distribute reflection worksheets or instruct students to prepare their journals"
+              },
+              "support": [
+                "Provide guiding questions to prompt deeper reflection",
+                "Allow flexible response formats (written, verbal, visual)"
+              ]
+            },
+            {
+              "action": "Facilitate whole-class sharing",
+              "purpose": "Consolidate learning and build metacognitive skills",
+              "lookFor": [
+                "Students sharing insights and learning experiences",
+                "Students connecting their learning to broader contexts",
+                "Respectful and constructive peer interactions"
+              ],
+              "management": {
+                "grouping": "whole",
+                "materials": [
+                  "None"
+                ],
+                "setup": "Create a safe space for sharing, establish guidelines for respectful discussion"
+              },
+              "support": [
+                "Provide prompts to guide sharing",
+                "Summarize key learning points and connections"
+              ]
+            }
+          ],
+          "assessmentPoints": [
+            {
+              "method": "Individual reflection submissions",
+              "criteria": [
+                "Depth of reflection",
+                "Evidence of metacognition",
+                "Articulation of learning and future goals"
+              ],
+              "followUp": [
+                "Provide personalized feedback on reflections",
+                "Use insights from reflections to plan future lessons",
+                "Identify common themes or areas for class-wide discussion"
+              ]
+            },
+            {
+              "method": "Whole class discussion",
+              "criteria": [
+                "Quality of shared insights",
+                "Evidence of consolidated learning",
+                "Respectful and constructive peer interactions"
+              ],
+              "followUp": [
+                "Summarize key learning points and connections",
+                "Address any unresolved questions or misconceptions",
+                "Celebrate learning and encourage continued application"
+              ]
+            }
+          ],
+          "environmentSetup": {
+            "roomArrangement": "Individual desks or quiet reflection space, followed by whole-class circle",
+            "materials": [
+              "Reflection worksheets or journals",
+              "Pencils or pens",
+              "None"
+            ],
+            "preparations": [
+              "Prepare reflection prompts or worksheets",
+              "Arrange for quiet individual work space",
+              "Set up whole-class circle for sharing and discussion"
+            ]
+          }
+        }
+      ],
+      "LearningObjectives": []
+    }
+}
+```

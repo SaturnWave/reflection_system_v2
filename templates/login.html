@@ -1,0 +1,41 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Reflection System - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full p-8">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Student Reflection System</h1>
+            <p class="text-gray-600">Please enter your access code to continue</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            {% if error %}
+            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-6">
+                    <label for="access_code" class="block text-sm font-medium text-gray-700 mb-2">Access Code</label>
+                    <input type="password" id="access_code" name="access_code" 
+                           placeholder="Enter 9-digit access code" maxlength="9" 
+                           class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                           pattern="[0-9]{9}" required>
+                    <p class="mt-2 text-xs text-gray-500">Enter the 9-digit access code provided by your instructor</p>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                    Access System
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
