@@ -9,34 +9,54 @@ import PyPDF2
 import io
 import boto3
 import botocore.session
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 import requests
 import functools
 import traceback
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+# Use environment variable for secret key (important for Vercel)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-replace-in-production')
 
-# Access code (in a real app, store this securely)
-ACCESS_CODE = "111111111"
+# Access code from environment variables
+ACCESS_CODE = os.environ.get('ACCESS_CODE', '111111111')
 
-# Initialize API clients
-fireworks_client = OpenAI(
-    api_key=os.getenv("FIREWORKS_API_KEY"),
-    base_url="https://api.fireworks.ai/inference/v1"
-)
+# Initialize API clients with better error handling
+try:
+    fireworks_api_key = os.environ.get("FIREWORKS_API_KEY")
+    if fireworks_api_key:
+        fireworks_client = OpenAI(
+            api_key=fireworks_api_key,
+            base_url="https://api.fireworks.ai/inference/v1"
+        )
+    else:
+        fireworks_client = None
+        logger.warning("FIREWORKS_API_KEY not set")
 
-groq_client = OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
-)
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if groq_api_key:
+        groq_client = OpenAI(
+            api_key=groq_api_key,
+            base_url="https://api.groq.com/openai/v1"
+        )
+    else:
+        groq_client = None
+        logger.warning("GROQ_API_KEY not set")
+except Exception as e:
+    logger.error(f"Error initializing API clients: {str(e)}")
+    fireworks_client = None
+    groq_client = None
 
-FIREWORKS_MODEL_ID = os.getenv("FIREWORKS_MODEL_ID", "accounts/fireworks/models/llama-v3p1-70b-instruct")
-BEDROCK_MODEL_ID = os.getenv("AWS_BEDROCK_MODEL_ID", "anthropic.claude-3-haiku-20240307-v1:0")
-GROQ_MODEL_ID = os.getenv("GROQ_MODEL_ID", "llama-3.3-70b-versatile")
+FIREWORKS_MODEL_ID = os.environ.get("FIREWORKS_MODEL_ID", "accounts/fireworks/models/llama-v3p1-70b-instruct")
+BEDROCK_MODEL_ID = os.environ.get("AWS_BEDROCK_MODEL_ID", "anthropic.claude-3-haiku-20240307-v1:0")
+GROQ_MODEL_ID = os.environ.get("GROQ_MODEL_ID", "llama-3.3-70b-versatile")
 
 # Reflection frameworks definitions
 REFLECTION_FRAMEWORKS = {
@@ -67,33 +87,58 @@ REFLECTION_FRAMEWORKS = {
     }
 }
 
-# Decorator to require access code
+# Decorator to require access code - with better error handling for Vercel
 def require_access(f):
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('authenticated'):
+        try:
+            if not session.get('authenticated'):
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        except Exception as e:
+            logger.error(f"Session error in require_access: {str(e)}")
+            # Fallback for serverless environment if session fails
             return redirect(url_for('login'))
-        return f(*args, **kwargs)
     return decorated_function
 
 def get_bedrock_client():
-    """Initialize and return an AWS Bedrock client."""
-    session = boto3.Session(
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION", "us-east-1")
-    )
-    return session.client(service_name='bedrock-runtime')
+    """Initialize and return an AWS Bedrock client with better error handling."""
+    try:
+        aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+        aws_secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+        aws_region = os.environ.get("AWS_REGION", "us-east-1")
+        
+        if not aws_access_key or not aws_secret_key:
+            logger.warning("AWS credentials not set")
+            return None
+            
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key,
+            region_name=aws_region
+        )
+        return session.client(service_name='bedrock-runtime')
+    except Exception as e:
+        logger.error(f"Error creating Bedrock client: {str(e)}")
+        return None
 
 def process_file(file):
-    """Process uploaded file and extract content. Supports PDF, DOCX/DOC, TXT, and JSON."""
+    """Process uploaded file with improved error handling for Vercel."""
     try:
         if not file:
             raise ValueError("No file provided")
 
+        # Check if file is accessible
+        if not hasattr(file, 'read'):
+            raise ValueError("File object is not readable")
+
         # Save the file content
         content = file.read()
-        filename = file.filename.lower()
+        
+        if not content:
+            raise ValueError("File is empty")
+            
+        filename = file.filename.lower() if hasattr(file, 'filename') else "unknown.txt"
         MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB limit
         if len(content) > MAX_FILE_SIZE:
             raise ValueError("File size exceeds limit of 5MB")
@@ -115,11 +160,12 @@ def process_file(file):
         else:
             raise ValueError(f"Unsupported file type: {filename}")
     except Exception as e:
-        print(f"Error processing file: {str(e)}")
+        logger.error(f"Error processing file: {str(e)}")
+        traceback.print_exc()
         raise
 
 def extract_json_from_response(response):
-    """Extract JSON from AI response, handling potential formatting issues."""
+    """Extract JSON from AI response with better error handling."""
     try:
         return json.loads(response)
     except json.JSONDecodeError:
@@ -142,14 +188,19 @@ def extract_json_from_response(response):
         return None
 
 def generate_ai_response(prompt, model_id, system_prompt="Return only the requested JSON."):
-    """Generate response using the selected AI model."""
-    print(f"Generating response with model: {model_id}")
+    """Generate response using the selected AI model with improved error handling."""
+    logger.info(f"Generating response with model: {model_id}")
     
     if "anthropic" in model_id.lower():
         # Use AWS Bedrock with Claude model
         try:
-            print("Using AWS Bedrock Claude model")
             bedrock = get_bedrock_client()
+            if not bedrock:
+                return json.dumps({
+                    "error": "AWS Bedrock client not available"
+                })
+                
+            logger.info("Using AWS Bedrock Claude model")
             payload = {
                 "anthropic_version": "bedrock-2023-05-31",
                 "max_tokens": 4096,
@@ -166,13 +217,20 @@ def generate_ai_response(prompt, model_id, system_prompt="Return only the reques
             response_body = json.loads(response['body'].read())
             return response_body['content'][0]['text']
         except Exception as e:
-            print(f"Error with Bedrock: {str(e)}")
+            logger.error(f"Error with Bedrock: {str(e)}")
             traceback.print_exc()
-            raise
+            return json.dumps({
+                "error": f"AWS Bedrock error: {str(e)}"
+            })
     elif "llama-3.3" in model_id.lower() or model_id.lower().startswith("groq/"):
         # Use Groq API
         try:
-            print("Using Groq API")
+            if not groq_client:
+                return json.dumps({
+                    "error": "Groq client not available"
+                })
+                
+            logger.info("Using Groq API")
             completion = groq_client.chat.completions.create(
                 model=model_id,
                 messages=[
@@ -183,13 +241,20 @@ def generate_ai_response(prompt, model_id, system_prompt="Return only the reques
             )
             return completion.choices[0].message.content
         except Exception as e:
-            print(f"Error with Groq: {str(e)}")
+            logger.error(f"Error with Groq: {str(e)}")
             traceback.print_exc()
-            raise
+            return json.dumps({
+                "error": f"Groq API error: {str(e)}"
+            })
     else:
         # Use Fireworks API
         try:
-            print("Using Fireworks API")
+            if not fireworks_client:
+                return json.dumps({
+                    "error": "Fireworks client not available"
+                })
+                
+            logger.info("Using Fireworks API")
             completion = fireworks_client.chat.completions.create(
                 model=model_id,
                 messages=[
@@ -200,9 +265,11 @@ def generate_ai_response(prompt, model_id, system_prompt="Return only the reques
             )
             return completion.choices[0].message.content
         except Exception as e:
-            print(f"Error with Fireworks: {str(e)}")
+            logger.error(f"Error with Fireworks: {str(e)}")
             traceback.print_exc()
-            raise
+            return json.dumps({
+                "error": f"Fireworks API error: {str(e)}"
+            })
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -240,9 +307,7 @@ def get_frameworks():
 def recommend_framework():
     """Analyze content and recommend the most suitable reflection framework."""
     try:
-        print("="*50)
-        print("RECOMMEND FRAMEWORK ENDPOINT CALLED")
-        print("="*50)
+        logger.info("RECOMMEND FRAMEWORK ENDPOINT CALLED")
         
         if 'file' not in request.files or not request.files['file'].filename:
             return jsonify({'error': 'No file provided'}), 400
@@ -250,13 +315,13 @@ def recommend_framework():
         # Process the file
         try:
             content = process_file(request.files['file'])
-            print(f"File processed, content length: {len(content)}")
+            logger.info(f"File processed, content length: {len(content)}")
         except Exception as e:
-            print(f"Error processing file: {str(e)}")
+            logger.error(f"Error processing file: {str(e)}")
             return jsonify({'error': f'Error processing file: {str(e)}'}), 500
             
         model_id = request.form.get('model', FIREWORKS_MODEL_ID)
-        print(f"Using model: {model_id}")
+        logger.info(f"Using model: {model_id}")
         
         # Create prompt for framework recommendation
         prompt = f"""Analyze this content and recommend the most suitable reflection framework from the options below.
@@ -292,31 +357,31 @@ Content to analyze: {content}"""
 
         # Generate AI response
         try:
-            print("Generating AI recommendation")
+            logger.info("Generating AI recommendation")
             response = generate_ai_response(
                 prompt,
                 model_id,
                 system_prompt="Analyze content and recommend the most suitable reflection framework."
             )
-            print("AI recommendation received")
+            logger.info("AI recommendation received")
         except Exception as e:
-            print(f"Error generating AI recommendation: {str(e)}")
+            logger.error(f"Error generating AI recommendation: {str(e)}")
             return jsonify({'error': f'Error with AI model: {str(e)}'}), 500
         
         # Extract recommendation
         try:
             recommendation = extract_json_from_response(response)
             if not recommendation:
-                print("Failed to extract valid JSON from AI response")
+                logger.error("Failed to extract valid JSON from AI response")
                 return jsonify({'error': 'Invalid AI response', 'raw_response': response}), 500
-            print(f"Recommendation: {recommendation}")
+            logger.info(f"Recommendation: {recommendation}")
         except Exception as e:
-            print(f"Error parsing AI response: {str(e)}")
+            logger.error(f"Error parsing AI response: {str(e)}")
             return jsonify({'error': f'Error parsing response: {str(e)}', 'raw_response': response}), 500
             
         return jsonify(recommendation)
     except Exception as e:
-        print(f"Unexpected error in recommend_framework: {str(e)}")
+        logger.error(f"Unexpected error in recommend_framework: {str(e)}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
@@ -325,83 +390,76 @@ Content to analyze: {content}"""
 def generate_reflection():
     """Generate reflection questions from uploaded lesson content using selected framework."""
     try:
-        # Print detailed debug information
-        print("="*50)
-        print("GENERATE REFLECTION ENDPOINT CALLED")
-        print("="*50)
+        logger.info("GENERATE REFLECTION ENDPOINT CALLED")
         
         # Check if request has files
-        print(f"Request has files: {request.files}")
-        print(f"Request form data: {request.form}")
+        logger.info(f"Request has files: {request.files}")
+        logger.info(f"Request form data: {request.form}")
         
         if 'file' not in request.files:
-            print("ERROR: No file part in request")
+            logger.error("ERROR: No file part in request")
             return jsonify({'error': 'No file part in request'}), 400
             
         file = request.files['file']
         if not file.filename:
-            print("ERROR: No file selected")
+            logger.error("ERROR: No file selected")
             return jsonify({'error': 'No file selected'}), 400
 
-        print(f"File received: {file.filename}")
+        logger.info(f"File received: {file.filename}")
         
         # Process the file and extract content
         try:
-            print(f"Attempting to process file {file.filename}")
+            logger.info(f"Attempting to process file {file.filename}")
             content = process_file(file)
-            print(f"File processed successfully, content length: {len(content)}")
-            print(f"First 100 chars of content: {content[:100]}")
+            logger.info(f"File processed successfully, content length: {len(content)}")
         except Exception as e:
-            print(f"ERROR processing file: {str(e)}")
+            logger.error(f"ERROR processing file: {str(e)}")
             traceback.print_exc()
             return jsonify({'error': f'Error processing file: {str(e)}'}), 500
         
         framework_id = request.form.get('framework', 'gibbs')
         model_id = request.form.get('model', FIREWORKS_MODEL_ID)
         
-        print(f"Framework: {framework_id}, Model: {model_id}")
+        logger.info(f"Framework: {framework_id}, Model: {model_id}")
         
         # Get the selected framework
         framework = REFLECTION_FRAMEWORKS.get(framework_id, REFLECTION_FRAMEWORKS['gibbs'])
-        print(f"Using framework: {framework['name']}")
+        logger.info(f"Using framework: {framework['name']}")
         
         # Create prompt based on the selected framework
         prompt = generate_framework_prompt(framework, content)
-        print(f"Prompt generated, length: {len(prompt)}")
+        logger.info(f"Prompt generated, length: {len(prompt)}")
         
         # Generate response using selected model
         try:
-            print(f"Attempting to generate AI response using model: {model_id}")
+            logger.info(f"Attempting to generate AI response using model: {model_id}")
             response = generate_ai_response(prompt, model_id)
-            print(f"AI response received, length: {len(response)}")
-            print(f"First 100 chars of response: {response[:100]}")
+            logger.info(f"AI response received, length: {len(response)}")
         except Exception as e:
-            print(f"ERROR generating AI response: {str(e)}")
+            logger.error(f"ERROR generating AI response: {str(e)}")
             traceback.print_exc()
             return jsonify({'error': f'Error with AI model: {str(e)}'}), 500
         
         # Parse the response
         try:
-            print("Trying to extract JSON from response")
+            logger.info("Trying to extract JSON from response")
             data = extract_json_from_response(response)
             if not data:
-                print("ERROR: Failed to extract valid JSON from AI response")
-                print(f"Raw response: {response}")
+                logger.error("ERROR: Failed to extract valid JSON from AI response")
                 return jsonify({'error': 'Invalid AI response', 'raw_response': response}), 500
-            print(f"JSON successfully extracted: {list(data.keys())}")
+            logger.info(f"JSON successfully extracted: {list(data.keys())}")
             if 'questions' in data:
-                print(f"Number of questions: {len(data['questions'])}")
+                logger.info(f"Number of questions: {len(data['questions'])}")
         except Exception as e:
-            print(f"ERROR parsing AI response: {str(e)}")
+            logger.error(f"ERROR parsing AI response: {str(e)}")
             traceback.print_exc()
             return jsonify({'error': f'Error parsing response: {str(e)}', 'raw_response': response}), 500
         
-        print("Returning successful response")
-        print("="*50)
+        logger.info("Returning successful response")
         return jsonify(data)
         
     except Exception as e:
-        print(f"UNEXPECTED ERROR in generate_reflection: {str(e)}")
+        logger.error(f"UNEXPECTED ERROR in generate_reflection: {str(e)}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
@@ -464,7 +522,7 @@ Return JSON:
         feedback = extract_json_from_response(response)
         return jsonify(feedback) if feedback else jsonify({'error': 'Invalid feedback', 'raw_response': response}), 500
     except Exception as e:
-        print(f"Error in handle_option_selection: {str(e)}")
+        logger.error(f"Error in handle_option_selection: {str(e)}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
@@ -495,9 +553,16 @@ Be conversational, tie to the context, and end with a question."""
         
         return jsonify({'response': response})
     except Exception as e:
-        print(f"Error in chat_response: {str(e)}")
+        logger.error(f"Error in chat_response: {str(e)}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Vercel-specific middleware for proper cache control
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+# Note: Don't include the app.run() section for Vercel deployment
+# if __name__ == '__main__':
+#     app.run(debug=True)
