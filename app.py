@@ -24,6 +24,7 @@ fireworks_client = OpenAI(
 )
 FIREWORKS_MODEL_ID = os.getenv("FIREWORKS_MODEL_ID", "accounts/fireworks/models/llama-v3p1-70b-instruct")
 
+
 # Authentication decorator to protect routes
 def require_access(f):
     @functools.wraps(f)
@@ -31,7 +32,9 @@ def require_access(f):
         if not session.get('authenticated'):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
+
     return decorated_function
+
 
 def process_file(file):
     """Extract text from uploaded files (PDF, DOCX, TXT, JSON)."""
@@ -51,6 +54,7 @@ def process_file(file):
     else:
         raise ValueError(f"Unsupported file type: {filename}")
 
+
 def extract_json_from_response(response):
     """Extract JSON from AI response, handling potential formatting issues."""
     try:
@@ -63,6 +67,7 @@ def extract_json_from_response(response):
             except:
                 pass
         return None
+
 
 def generate_statements(content):
     """Generate 8 reflection statements using Gibbs' Reflective Cycle."""
@@ -96,6 +101,7 @@ def generate_statements(content):
         raise ValueError("Failed to generate valid statements")
     return data['statements']
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Handle login with 9-digit access code."""
@@ -109,11 +115,13 @@ def login():
             error = 'Invalid access code'
     return render_template('login.html', error=error)
 
+
 @app.route('/')
 @require_access
 def index():
     """Render the main page."""
     return render_template('index.html')
+
 
 @app.route('/generate-reflection', methods=['POST'])
 @require_access
@@ -128,6 +136,46 @@ def generate_reflection():
         return jsonify({'statements': statements})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/chat', methods=['POST'])
+@require_access
+def chat():
+    """Handle chat messages and return AI responses."""
+    try:
+        data = request.json
+
+        if not data or 'message' not in data:
+            return jsonify({'error': 'No message provided'}), 400
+
+        user_message = data['message']
+        reflection_scores = data.get('reflectionScores', {})
+
+        # Create a prompt that includes context about the user's reflection
+        prompt = f"""The user is a student who has just completed a reflection exercise with the following scores:
+{json.dumps(reflection_scores, indent=2)}
+
+Their message is: {user_message}
+
+Respond as a helpful educational assistant who can discuss their reflections and answer questions
+about their learning. Keep responses encouraging, concise, and educational.
+"""
+
+        # Generate response using the AI model
+        response = fireworks_client.chat.completions.create(
+            model=FIREWORKS_MODEL_ID,
+            messages=[
+                {"role": "system", "content": "You are a helpful educational assistant for students."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=400
+        ).choices[0].message.content
+
+        return jsonify({'response': response})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

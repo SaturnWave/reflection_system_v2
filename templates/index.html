@@ -48,6 +48,26 @@
             <p id="interpretation" class="text-gray-600 mb-6"></p>
             <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Start New Reflection</button>
         </div>
+
+        <!-- Chat Interface -->
+        <div id="chatContainer" class="hidden bg-white rounded-lg shadow-md p-6 mt-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Discuss Your Reflections</h3>
+            <p class="text-gray-600 mb-4">Chat with an AI assistant about your reflections and deepen your understanding.</p>
+
+            <div id="chatMessages" class="border rounded-lg p-4 mb-4 h-80 overflow-y-auto flex flex-col space-y-3">
+                <div class="bg-blue-100 rounded-lg p-3 max-w-3/4 self-start">
+                    <p class="text-gray-800">Hello! I'm your learning assistant. Feel free to ask me about your reflections or if you need clarification on any of the topics covered.</p>
+                </div>
+            </div>
+
+            <div class="flex">
+                <input type="text" id="messageInput" placeholder="Type your message here..."
+                      class="flex-grow p-3 border rounded-l-lg focus:ring-2 focus:ring-blue-500">
+                <button id="sendMessageBtn" class="bg-blue-600 text-white px-6 py-3 rounded-r-lg hover:bg-blue-700">
+                    Send
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -142,6 +162,9 @@
                 document.getElementById('interpretation').textContent = interpretation;
                 document.getElementById('questionsContainer').classList.add('hidden');
                 document.getElementById('resultsContainer').classList.remove('hidden');
+
+                // Show the chat interface after displaying results
+                showChatInterface();
             }
         });
 
@@ -151,6 +174,96 @@
             else if (score >= 2.5) return "Moderate understanding and reflection.";
             else return "Needs improvement in understanding and reflection.";
         }
+
+        // Function to show the chat interface after completing the reflection
+        function showChatInterface() {
+            document.getElementById('chatContainer').classList.remove('hidden');
+
+            // Scroll to the chat container
+            document.getElementById('chatContainer').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Function to add a message to the chat
+        function addMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+
+            messageDiv.className = isUser
+                ? 'bg-gray-100 rounded-lg p-3 max-w-3/4 self-end'
+                : 'bg-blue-100 rounded-lg p-3 max-w-3/4 self-start';
+
+            const messagePara = document.createElement('p');
+            messagePara.className = 'text-gray-800';
+            messagePara.textContent = message;
+
+            messageDiv.appendChild(messagePara);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to the bottom of the chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to send message to the server
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, true);
+
+            // Clear input
+            messageInput.value = '';
+
+            // Create an object with the ratings for each statement
+            const reflectionScores = {};
+            currentStatements.forEach((statement, index) => {
+                reflectionScores[statement.stage] = reflectionScores[statement.stage] || [];
+                reflectionScores[statement.stage].push({
+                    statement: statement.statement,
+                    score: ratings[index]
+                });
+            });
+
+            try {
+                // Send message to server
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message,
+                        reflectionScores
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Add AI response to chat
+                addMessage(data.response);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('Sorry, I encountered an error processing your message. Please try again.');
+            }
+        }
+
+        // Handle send button click
+        document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+
+        // Handle Enter key in message input
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>
