@@ -10,77 +10,57 @@
     <div class="max-w-4xl mx-auto p-8">
         <header class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">Student Reflection System</h1>
-            <p class="text-gray-600">Using Gibbs' Reflective Cycle</p>
+            <p class="text-gray-600">Upload your lesson content to generate guided reflection statements</p>
         </header>
 
         <div id="uploadSection" class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload Lesson Content</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload Learning Material</h2>
             <p class="text-sm text-gray-600 mb-4">Supported formats: PDF, DOCX, TXT, JSON</p>
             <input type="file" id="documentFile" accept=".pdf,.docx,.txt,.json"
                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
             <button id="generateBtn" class="mt-4 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
-                Generate Reflection Questions
+                Generate Reflection Statements
             </button>
         </div>
 
         <div id="loadingState" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Generating questions...</p>
+            <p class="text-gray-600">Generating statements...</p>
         </div>
 
         <div id="questionsContainer" class="hidden">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-blue-800">Gibbs' Reflective Cycle</h3>
-                        <span id="questionCounter" class="text-sm font-medium text-gray-600"></span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span id="stageIndicator" class="text-sm font-medium text-blue-600"></span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progressBar" class="bg-blue-600 h-2 rounded-full"></div>
-                    </div>
+                    <h3 id="questionCounter" class="text-lg font-semibold text-blue-800"></h3>
+                    <p id="stageIndicator" class="text-sm text-gray-600"></p>
                 </div>
-
-                <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                    <h3 class="text-sm font-semibold text-blue-800 mb-2">Context</h3>
-                    <p id="contextText" class="text-sm text-blue-700"></p>
+                <p id="statementText" class="text-xl font-semibold text-gray-800 mb-6"></p>
+                <div id="likertScale" class="space-y-3 mb-6">
+                    <!-- Likert scale radio buttons will be dynamically inserted -->
                 </div>
-
-                <h3 id="questionText" class="text-xl font-semibold text-gray-800 mb-6"></h3>
-                <div id="optionsContainer" class="space-y-3 mb-6"></div>
-
-                <div id="chatContainer" class="mt-6">
-                    <div id="chatMessages" class="bg-gray-100 rounded-lg p-4 mb-4 h-64 overflow-y-scroll"></div>
-                    <div class="flex">
-                        <input type="text" id="chatInput" class="flex-grow p-2 border rounded-l-lg focus:ring-2 focus:ring-blue-500" placeholder="Type your response...">
-                        <button id="sendChat" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700">Send</button>
-                    </div>
-                    <button id="nextQuestion" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">Next Question</button>
-                </div>
-
-                <button id="nextButton" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mx-auto block" disabled>Start Reflection</button>
+                <button id="nextButton" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mx-auto block" disabled>Next</button>
             </div>
         </div>
 
         <div id="resultsContainer" class="hidden bg-white rounded-lg shadow-md p-6 text-center">
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Reflection Complete!</h3>
-            <p class="text-gray-600 mb-6">Thank you for your thoughtful responses.</p>
+            <p class="text-gray-600 mb-4">Your average reflection score is <span id="averageScore"></span> out of 5.</p>
+            <p id="interpretation" class="text-gray-600 mb-6"></p>
             <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Start New Reflection</button>
         </div>
     </div>
 
     <script>
-        let currentQuestions = [];
-        let currentQuestionIndex = 0;
-        let selectedAnswers = new Array(6).fill(null);
-        let conversationHistory = [];
+        let currentStatements = [];
+        let currentIndex = 0;
+        let ratings = [];
 
+        // Enable generate button when a file is selected
         document.getElementById('documentFile').addEventListener('change', function() {
             document.getElementById('generateBtn').disabled = !this.files.length;
         });
 
+        // Handle file upload and statement generation
         document.getElementById('generateBtn').addEventListener('click', async function() {
             const file = document.getElementById('documentFile').files[0];
             if (!file) return;
@@ -94,9 +74,10 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error);
 
-                currentQuestions = data.questions;
+                currentStatements = data.statements;
+                ratings = new Array(currentStatements.length).fill(null);
                 showQuestions(true);
-                displayQuestion(0);
+                displayStatement(0);
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {
@@ -106,116 +87,69 @@
 
         function showLoading(show) {
             document.getElementById('loadingState').classList.toggle('hidden', !show);
-            document.getElementById('questionsContainer').classList.toggle('hidden', show);
+            document.getElementById('uploadSection').classList.toggle('hidden', show);
         }
 
         function showQuestions(show) {
             document.getElementById('questionsContainer').classList.toggle('hidden', !show);
         }
 
-        function displayQuestion(index) {
-            const question = currentQuestions[index];
-            document.getElementById('questionCounter').textContent = `Question ${index + 1} of ${currentQuestions.length}`;
-            document.getElementById('progressBar').style.width = `${((index + 1) / currentQuestions.length) * 100}%`;
-            document.getElementById('stageIndicator').textContent = question.stage;
-            document.getElementById('contextText').textContent = question.context;
-            document.getElementById('questionText').textContent = question.question;
+        function displayStatement(index) {
+            const statement = currentStatements[index];
+            document.getElementById('questionCounter').textContent = `Statement ${index + 1} of ${currentStatements.length}`;
+            document.getElementById('stageIndicator').textContent = `Stage: ${statement.stage}`;
+            document.getElementById('statementText').textContent = statement.statement;
 
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = '';
+            const likertScale = document.getElementById('likertScale');
+            likertScale.innerHTML = '';
+            const scaleLabels = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+            for (let i = 1; i <= 5; i++) {
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'rating';
+                radio.value = i;
+                radio.id = `rating${i}`;
+                radio.onchange = () => {
+                    ratings[index] = i;
+                    document.getElementById('nextButton').disabled = false;
+                };
+                if (ratings[index] === i) radio.checked = true;
 
-            question.options.forEach((option, i) => {
-                const button = document.createElement('button');
-                button.className = `w-full text-left p-4 rounded-lg border ${selectedAnswers[index]?.option === i ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-200 hover:bg-gray-100'}`;
-                button.textContent = option;
-                button.onclick = () => handleOptionSelect(i, option);
-                optionsContainer.appendChild(button);
-            });
+                const label = document.createElement('label');
+                label.htmlFor = `rating${i}`;
+                label.textContent = `${i} - ${scaleLabels[i-1]}`;
 
-            document.getElementById('chatContainer').classList.add('hidden');
-            document.getElementById('nextButton').disabled = !selectedAnswers[index];
-            if (selectedAnswers[index]?.conversationStarted) {
-                document.getElementById('chatContainer').classList.remove('hidden');
+                const div = document.createElement('div');
+                div.className = 'flex items-center mb-2';
+                div.appendChild(radio);
+                div.appendChild(label);
+                likertScale.appendChild(div);
             }
-        }
 
-        function handleOptionSelect(optionIndex, optionText) {
-            selectedAnswers[currentQuestionIndex] = { option: optionIndex, conversationStarted: false };
-            highlightSelectedOption(optionIndex);
-            document.getElementById('nextButton').textContent = 'Start Reflection';
-            document.getElementById('nextButton').disabled = false;
-        }
-
-        function highlightSelectedOption(index) {
-            document.querySelectorAll('#optionsContainer button').forEach((btn, i) => {
-                btn.classList.toggle('bg-blue-100', i === index);
-                btn.classList.toggle('border-blue-500', i === index);
-                btn.classList.toggle('bg-white', i !== index);
-                btn.classList.toggle('border-gray-200', i !== index);
-            });
+            document.getElementById('nextButton').disabled = ratings[index] === null;
         }
 
         document.getElementById('nextButton').addEventListener('click', () => {
-            if (!selectedAnswers[currentQuestionIndex].conversationStarted) {
-                conversationHistory = [];
-                document.getElementById('chatMessages').innerHTML = '';
-                document.getElementById('chatContainer').classList.remove('hidden');
-                selectedAnswers[currentQuestionIndex].conversationStarted = true;
-                document.getElementById('nextButton').textContent = 'Next Question';
-                document.getElementById('nextButton').disabled = true;
+            if (currentIndex < currentStatements.length - 1) {
+                currentIndex++;
+                displayStatement(currentIndex);
             } else {
-                nextQuestion();
-            }
-        });
+                const total = ratings.reduce((sum, val) => sum + val, 0);
+                const average = total / ratings.length;
+                const interpretation = getInterpretation(average);
 
-        document.getElementById('sendChat').addEventListener('click', async () => {
-            const input = document.getElementById('chatInput').value.trim();
-            if (!input) return;
-
-            addChatMessage('User', input);
-            conversationHistory.push({ role: 'user', content: input });
-
-            try {
-                const response = await fetch('/chat_response', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userInput: input,
-                        conversationHistory: conversationHistory,
-                        stage: currentQuestions[currentQuestionIndex].stage,
-                        context: currentQuestions[currentQuestionIndex].context
-                    })
-                });
-                const data = await response.json();
-                addChatMessage('Assistant', data.response);
-                conversationHistory.push({ role: 'assistant', content: data.response });
-                document.getElementById('nextButton').disabled = false;
-            } catch (error) {
-                console.error('Error:', error);
-            }
-
-            document.getElementById('chatInput').value = '';
-        });
-
-        function addChatMessage(role, content) {
-            const messages = document.getElementById('chatMessages');
-            const div = document.createElement('div');
-            div.className = role === 'User' ? 'text-right mb-2' : 'text-left mb-2';
-            div.innerHTML = `<span class="inline-block p-2 rounded-lg ${role === 'User' ? 'bg-blue-100' : 'bg-gray-200'}">${content}</span>`;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        document.getElementById('nextQuestion').addEventListener('click', nextQuestion);
-
-        function nextQuestion() {
-            if (currentQuestionIndex < currentQuestions.length - 1) {
-                currentQuestionIndex++;
-                displayQuestion(currentQuestionIndex);
-            } else {
+                document.getElementById('averageScore').textContent = average.toFixed(2);
+                document.getElementById('interpretation').textContent = interpretation;
                 document.getElementById('questionsContainer').classList.add('hidden');
                 document.getElementById('resultsContainer').classList.remove('hidden');
             }
+        });
+
+        function getInterpretation(score) {
+            if (score >= 4.5) return "Excellent understanding and reflection.";
+            else if (score >= 3.5) return "Good understanding and reflection.";
+            else if (score >= 2.5) return "Moderate understanding and reflection.";
+            else return "Needs improvement in understanding and reflection.";
         }
     </script>
 </body>
