@@ -1,129 +1,57 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Student Reflection System</title>
+    <title>Student Reflection System</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto p-8">
-        <header class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-4xl font-bold text-gray-800 mb-2">Enhanced Student Reflection System</h1>
-                <p class="text-gray-600">Upload your lesson content and choose a reflection framework</p>
-            </div>
-            <a href="{{ url_for('logout') }}" class="text-sm text-blue-600 hover:text-blue-800">Logout</a>
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Student Reflection System</h1>
+            <p class="text-gray-600">Using Gibbs' Reflective Cycle</p>
         </header>
 
         <div id="uploadSection" class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Configure Your Reflection</h2>
-            
-            <!-- AI recommendation section (initially hidden) -->
-            <div id="aiRecommendationSection" class="hidden mt-4 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-lg font-semibold text-blue-800">AI Recommended Framework</h3>
-                    <button id="closeRecommendation" class="text-gray-500 hover:text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-14a8 8 0 1 0 0 16A8 8 0 0 0 8 1z"/>
-                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </button>
-                </div>
-                <h4 id="recommendedFrameworkName" class="text-blue-700 font-medium mb-2"></h4>
-                <p id="recommendationExplanation" class="text-sm text-blue-600 mb-3"></p>
-                <div class="text-sm text-gray-600 mb-3">
-                    <span class="font-medium">Content summary: </span>
-                    <span id="contentSummary"></span>
-                </div>
-                <button id="useRecommendedFramework" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                    Use This Framework
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label for="frameworkSelect" class="block text-sm font-medium text-gray-700">Choose Reflection Framework</label>
-                        <button id="recommendFrameworkBtn" class="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed" disabled>
-                            Let AI Choose
-                        </button>
-                    </div>
-                    <select id="frameworkSelect" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="gibbs">Gibbs' Reflective Cycle</option>
-                        <option value="what_so_what">What? So What? Now What?</option>
-                        <option value="deal">DEAL Model for Critical Reflection</option>
-                        <option value="5r">5R Framework</option>
-                        <option value="star">STAR Method</option>
-                    </select>
-                    <div id="frameworkDescription" class="mt-2 text-sm text-gray-600">A cyclical model for reflecting on experiences</div>
-                </div>
-                
-                <div>
-                    <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">Choose AI Model</label>
-                    <select id="modelSelect" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="accounts/fireworks/models/llama-v3p1-70b-instruct">Llama 3 (Fireworks)</option>
-                        <option value="anthropic.claude-3-haiku-20240307-v1:0">Claude 3 Haiku (AWS Bedrock)</option>
-                        <option value="llama-3.3-70b-versatile">Llama 3.3 (Groq)</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <label for="documentFile" class="block text-sm font-medium text-gray-700 mb-2">Upload Learning Material</label>
-                <div class="mb-2 text-sm text-gray-600">Supported formats: PDF, DOCX, DOC, TXT, JSON</div>
-                <input type="file" id="documentFile" accept=".pdf,.docx,.doc,.txt,.json" 
-                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-            </div>
-            
-            <button id="generateBtn" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload Lesson Content</h2>
+            <p class="text-sm text-gray-600 mb-4">Supported formats: PDF, DOCX, TXT, JSON</p>
+            <input type="file" id="documentFile" accept=".pdf,.docx,.txt,.json"
+                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <button id="generateBtn" class="mt-4 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
                 Generate Reflection Questions
             </button>
         </div>
 
         <div id="loadingState" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p id="loadingText" class="text-gray-600">Generating reflection prompts...</p>
+            <p class="text-gray-600">Generating questions...</p>
         </div>
 
         <div id="questionsContainer" class="hidden">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 id="frameworkTitle" class="text-lg font-semibold text-blue-800"></h3>
+                        <h3 class="text-lg font-semibold text-blue-800">Gibbs' Reflective Cycle</h3>
                         <span id="questionCounter" class="text-sm font-medium text-gray-600"></span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span id="stageIndicator" class="text-sm font-medium text-blue-600"></span>
-                        <span id="stageDescription" class="text-sm text-gray-600"></span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div id="progressBar" class="bg-blue-600 h-2 rounded-full"></div>
                     </div>
                 </div>
 
-                <div id="contextSection" class="mb-6 bg-blue-50 rounded-lg p-4">
-                    <h3 class="text-sm font-semibold text-blue-800 mb-2">Lesson Context</h3>
+                <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-2">Context</h3>
                     <p id="contextText" class="text-sm text-blue-700"></p>
                 </div>
 
                 <h3 id="questionText" class="text-xl font-semibold text-gray-800 mb-6"></h3>
                 <div id="optionsContainer" class="space-y-3 mb-6"></div>
 
-                <div id="deeperReflectionContainer" class="hidden mt-6">
-                    <div class="bg-green-50 rounded-lg p-4 mb-4">
-                        <p id="feedbackText" class="text-green-700 mb-3"></p>
-                    </div>
-                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                        <h4 class="text-blue-800 font-semibold mb-2">Deeper Reflection</h4>
-                        <p id="deeperThought" class="text-blue-700 mb-3"></p>
-                        <textarea id="reflectionInput" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Your thoughts..."></textarea>
-                    </div>
-                    <button id="submitReflection" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Submit Reflection</button>
-                </div>
-
-                <div id="chatContainer" class="hidden mt-6">
+                <div id="chatContainer" class="mt-6">
                     <div id="chatMessages" class="bg-gray-100 rounded-lg p-4 mb-4 h-64 overflow-y-scroll"></div>
                     <div class="flex">
                         <input type="text" id="chatInput" class="flex-grow p-2 border rounded-l-lg focus:ring-2 focus:ring-blue-500" placeholder="Type your response...">
@@ -132,7 +60,7 @@
                     <button id="nextQuestion" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">Next Question</button>
                 </div>
 
-                <button id="nextButton" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mx-auto block" disabled>Next</button>
+                <button id="nextButton" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mx-auto block" disabled>Start Reflection</button>
             </div>
         </div>
 
@@ -144,142 +72,22 @@
     </div>
 
     <script>
-        // Framework descriptions
-        const frameworkDescriptions = {
-            "gibbs": "A cyclical model for reflecting on experiences through Description, Feelings, Evaluation, Analysis, Conclusion, and Action Plan.",
-            "what_so_what": "A simple framework progressing from description (What?) to analysis (So What?) to action (Now What?).",
-            "deal": "Focuses on connecting experiences to learning objectives through Describe, Examine, and Articulate Learning stages.",
-            "5r": "A comprehensive framework moving from simple reporting to reconstruction through Reporting, Responding, Relating, Reasoning, and Reconstructing.",
-            "star": "Structured approach to reflect on specific experiences through Situation, Task, Action, and Result."
-        };
-        
-        // Stage descriptions
-        const stageDescriptions = {
-            // Gibbs
-            "Description": "Describe what happened objectively, without judgments or conclusions.",
-            "Feelings": "Explore the emotions and feelings experienced during the event.",
-            "Evaluation": "Assess what was good and bad about the experience.",
-            "Analysis": "Make sense of the situation by examining why things happened as they did.",
-            "Conclusion": "Consider alternative actions and what else could have been done.",
-            "Action Plan": "Determine specific steps for handling similar situations in the future.",
-            
-            // What? So What? Now What?
-            "What?": "Objectively describe the experience, facts, and observations.",
-            "So What?": "Analyze the significance and implications of the experience.",
-            "Now What?": "Consider how to apply insights and plan future action.",
-            
-            // DEAL
-            "Describe": "Objectively document the experience without interpretation.",
-            "Examine": "Analyze the experience in relation to specific learning objectives.",
-            "Articulate Learning": "Express what was learned, how it was learned, why it matters, and when it can be applied.",
-            
-            // 5R
-            "Reporting": "Describe the key events or facts of the experience.",
-            "Responding": "Express personal reactions, feelings, or observations.",
-            "Relating": "Connect the experience to prior knowledge or experiences.",
-            "Reasoning": "Explain the significance and underlying concepts.",
-            "Reconstructing": "Develop a plan for future application of learning.",
-            
-            // STAR
-            "Situation": "Describe the context and circumstances of the experience.",
-            "Task": "Explain what you were trying to accomplish or were responsible for.",
-            "Action": "Detail the specific steps taken to address the task.",
-            "Result": "Share the outcomes and reflect on what was achieved or learned."
-        };
-
         let currentQuestions = [];
         let currentQuestionIndex = 0;
-        let selectedAnswers = new Array(8).fill(null);
+        let selectedAnswers = new Array(6).fill(null);
         let conversationHistory = [];
-        let selectedModel = document.getElementById('modelSelect').value;
-        
-        // Update framework description when selection changes
-        document.getElementById('frameworkSelect').addEventListener('change', function() {
-            const framework = this.value;
-            document.getElementById('frameworkDescription').textContent = frameworkDescriptions[framework];
-        });
-        
-        // Enable generate button when file is selected
+
         document.getElementById('documentFile').addEventListener('change', function() {
-            const hasFile = this.files.length > 0;
-            document.getElementById('generateBtn').disabled = !hasFile;
-            document.getElementById('recommendFrameworkBtn').disabled = !hasFile;
+            document.getElementById('generateBtn').disabled = !this.files.length;
         });
-        
-        // AI Framework recommendation
-        document.getElementById('recommendFrameworkBtn').addEventListener('click', async function() {
-            const file = document.getElementById('documentFile').files[0];
-            if (!file) {
-                alert("Please select a file first");
-                return;
-            }
-            
-            showLoading(true, "Analyzing content and recommending framework...");
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('model', document.getElementById('modelSelect').value);
-            
-            try {
-                const response = await fetch('/recommend-framework', { method: 'POST', body: formData });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server error: ${errorText}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Display recommendation
-                document.getElementById('recommendedFrameworkName').textContent = data.framework_name;
-                document.getElementById('recommendationExplanation').textContent = data.explanation;
-                document.getElementById('contentSummary').textContent = data.content_summary;
-                document.getElementById('aiRecommendationSection').classList.remove('hidden');
-                
-                // Set recommended framework value
-                const frameworkSelect = document.getElementById('frameworkSelect');
-                for (let i = 0; i < frameworkSelect.options.length; i++) {
-                    if (frameworkSelect.options[i].value === data.recommended_framework) {
-                        frameworkSelect.selectedIndex = i;
-                        document.getElementById('frameworkDescription').textContent = frameworkDescriptions[data.recommended_framework];
-                        break;
-                    }
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert('Error: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        });
-        
-        // Close recommendation section
-        document.getElementById('closeRecommendation').addEventListener('click', function() {
-            document.getElementById('aiRecommendationSection').classList.add('hidden');
-        });
-        
-        // Use recommended framework button
-        document.getElementById('useRecommendedFramework').addEventListener('click', function() {
-            document.getElementById('aiRecommendationSection').classList.add('hidden');
-            document.getElementById('generateBtn').click();
-        });
-        
-        // Handle generate button click
+
         document.getElementById('generateBtn').addEventListener('click', async function() {
             const file = document.getElementById('documentFile').files[0];
-            const framework = document.getElementById('frameworkSelect').value;
-            selectedModel = document.getElementById('modelSelect').value;
-            
             if (!file) return;
 
             showLoading(true);
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('framework', framework);
-            formData.append('model', selectedModel);
 
             try {
                 const response = await fetch('/generate-reflection', { method: 'POST', body: formData });
@@ -287,7 +95,6 @@
                 if (data.error) throw new Error(data.error);
 
                 currentQuestions = data.questions;
-                document.getElementById('frameworkTitle').textContent = data.framework || framework;
                 showQuestions(true);
                 displayQuestion(0);
             } catch (error) {
@@ -297,10 +104,8 @@
             }
         });
 
-        function showLoading(show, message = "Generating reflection prompts...") {
-            document.getElementById('loadingText').textContent = message;
+        function showLoading(show) {
             document.getElementById('loadingState').classList.toggle('hidden', !show);
-            document.getElementById('uploadSection').classList.toggle('hidden', show);
             document.getElementById('questionsContainer').classList.toggle('hidden', show);
         }
 
@@ -310,16 +115,15 @@
 
         function displayQuestion(index) {
             const question = currentQuestions[index];
-            
             document.getElementById('questionCounter').textContent = `Question ${index + 1} of ${currentQuestions.length}`;
             document.getElementById('progressBar').style.width = `${((index + 1) / currentQuestions.length) * 100}%`;
             document.getElementById('stageIndicator').textContent = question.stage;
-            document.getElementById('stageDescription').textContent = stageDescriptions[question.stage] || '';
             document.getElementById('contextText').textContent = question.context;
             document.getElementById('questionText').textContent = question.question;
 
             const optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
+
             question.options.forEach((option, i) => {
                 const button = document.createElement('button');
                 button.className = `w-full text-left p-4 rounded-lg border ${selectedAnswers[index]?.option === i ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-200 hover:bg-gray-100'}`;
@@ -328,43 +132,18 @@
                 optionsContainer.appendChild(button);
             });
 
-            document.getElementById('deeperReflectionContainer').classList.add('hidden');
             document.getElementById('chatContainer').classList.add('hidden');
             document.getElementById('nextButton').disabled = !selectedAnswers[index];
-            
-            if (selectedAnswers[index]?.followUp) {
-                document.getElementById('feedbackText').textContent = `${selectedAnswers[index].followUp.acknowledgment} ${selectedAnswers[index].followUp.encouragement}`;
-                document.getElementById('deeperThought').textContent = selectedAnswers[index].followUp.deeperThought;
-                document.getElementById('deeperReflectionContainer').classList.remove('hidden');
+            if (selectedAnswers[index]?.conversationStarted) {
+                document.getElementById('chatContainer').classList.remove('hidden');
             }
         }
 
-        async function handleOptionSelect(optionIndex, optionText) {
-            const question = currentQuestions[currentQuestionIndex];
-            selectedAnswers[currentQuestionIndex] = { option: optionIndex };
+        function handleOptionSelect(optionIndex, optionText) {
+            selectedAnswers[currentQuestionIndex] = { option: optionIndex, conversationStarted: false };
             highlightSelectedOption(optionIndex);
+            document.getElementById('nextButton').textContent = 'Start Reflection';
             document.getElementById('nextButton').disabled = false;
-
-            try {
-                const response = await fetch('/select_option', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        selectedOption: optionText, 
-                        stage: question.stage, 
-                        context: question.context,
-                        model: selectedModel
-                    })
-                });
-                const followUp = await response.json();
-                selectedAnswers[currentQuestionIndex].followUp = followUp;
-
-                document.getElementById('feedbackText').textContent = `${followUp.acknowledgment} ${followUp.encouragement}`;
-                document.getElementById('deeperThought').textContent = followUp.deeperThought;
-                document.getElementById('deeperReflectionContainer').classList.remove('hidden');
-            } catch (error) {
-                console.error('Error:', error);
-            }
         }
 
         function highlightSelectedOption(index) {
@@ -376,18 +155,17 @@
             });
         }
 
-        document.getElementById('submitReflection').addEventListener('click', () => {
-            const reflectionText = document.getElementById('reflectionInput').value.trim();
-            if (!reflectionText) {
-                alert('Please enter your reflection.');
-                return;
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (!selectedAnswers[currentQuestionIndex].conversationStarted) {
+                conversationHistory = [];
+                document.getElementById('chatMessages').innerHTML = '';
+                document.getElementById('chatContainer').classList.remove('hidden');
+                selectedAnswers[currentQuestionIndex].conversationStarted = true;
+                document.getElementById('nextButton').textContent = 'Next Question';
+                document.getElementById('nextButton').disabled = true;
+            } else {
+                nextQuestion();
             }
-
-            conversationHistory = [{ role: 'user', content: reflectionText }];
-            addChatMessage('User', reflectionText);
-            addChatMessage('Assistant', `That's a great start! ${selectedAnswers[currentQuestionIndex].followUp.encouragement} What else did you notice or learn from that part of the lesson?`);
-            document.getElementById('chatContainer').classList.remove('hidden');
-            document.getElementById('deeperReflectionContainer').classList.add('hidden');
         });
 
         document.getElementById('sendChat').addEventListener('click', async () => {
@@ -405,13 +183,13 @@
                         userInput: input,
                         conversationHistory: conversationHistory,
                         stage: currentQuestions[currentQuestionIndex].stage,
-                        context: currentQuestions[currentQuestionIndex].context,
-                        model: selectedModel
+                        context: currentQuestions[currentQuestionIndex].context
                     })
                 });
                 const data = await response.json();
                 addChatMessage('Assistant', data.response);
                 conversationHistory.push({ role: 'assistant', content: data.response });
+                document.getElementById('nextButton').disabled = false;
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -429,7 +207,6 @@
         }
 
         document.getElementById('nextQuestion').addEventListener('click', nextQuestion);
-        document.getElementById('nextButton').addEventListener('click', nextQuestion);
 
         function nextQuestion() {
             if (currentQuestionIndex < currentQuestions.length - 1) {
